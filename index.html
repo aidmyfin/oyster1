@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Oyster Personal Finance | NCR 11356</title>
+    
+    <!-- Professional Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Animation Engines -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #00ff88; /* Money Green */
+            --secondary: #0066ff; /* Finance Blue */
+            --bg: #04080f;
+            --card-bg: rgba(10, 20, 30, 0.7);
+            --border: rgba(0, 255, 136, 0.2);
+            --text-main: #ffffff;
+            --text-dim: #a0aec0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* UI Layer */
+        .wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        /* Neat Card System */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        .card.active {
+            display: block;
+        }
+
+        .ncr-badge {
+            display: inline-block;
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        /* Selection List */
+        .selection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-dim);
+        }
+
+        .option-item:hover {
+            border-color: var(--primary);
+            background: rgba(0, 255, 136, 0.05);
+            color: white;
+        }
+
+        .option-item.selected {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        /* Action Button */
+        .btn-next {
+            background: linear-gradient(90deg, var(--primary), #00d4ff);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            width: 100%;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-next:active {
+            transform: scale(0.98);
+        }
+
+        /* Highlight Boxes */
+        .promo-box {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px dashed var(--primary);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .amount-hero {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 10px 0;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Redirect Timer */
+        #redirect-timer {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            z-index: 100;
+            display: none;
+        }
+
+        /* Loader Animation */
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 255, 136, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 480px) {
+            .card { padding: 24px 20px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div id="redirect-timer">Redirecting to application in <span id="sec">6</span>s</div>
+
+    <div class="wrapper">
+        
+        <!-- STEP 1: WELCOME -->
+        <div class="card active" id="step1">
+            <span class="ncr-badge">NCR 11356</span>
+            <h1>Welcome to Oyster Personal Finance</h1>
+            <p>With Oyster you can Get Instant Finance you need now with simple step below check if you can qualify when you apply for a Loan with Us</p>
+            <div class="promo-box">
+                <div class="amount-hero">Instant Pay out</div>
+                <div style="font-size: 0.8rem; color: var(--primary);">MAXIMUM FACILITY</div>
+            </div>
+            <p>Get instant feedback To check for Qualification.</p>
+            <button class="btn-next" onclick="nextStep(2)">Check Qualification</button>
+        </div>
+
+        <!-- STEP 2: LOAN AMOUNT -->
+        <div class="card" id="step2">
+            <h1>Loan Required</h1>
+            <p>Select the amount you wish to apply for today.</p>
+            <div class="selection-list">
+                <div class="option-item" onclick="pickAmount('R10,000 - R30,000', this)">Between R10,000 — R30,000</div>
+                <div class="option-item" onclick="pickAmount('R30,000 - R70,000', this)">Between R30,000 — R70,000</div>
+                <div class="option-item" onclick="pickAmount('R70,000 - R150,000', this)">Between R70,000 — R150,000</div>
+                <div class="option-item" onclick="pickAmount('R150,000 - R400,000', this)">Between R150,000 — R400,000 or more</div>
+            </div>
+            <button class="btn-next" onclick="nextStep(3)">Continue</button>
+        </div>
+
+        <!-- STEP 3: EMPLOYMENT -->
+        <div class="card" id="step3">
+            <h1>Employment Status</h1>
+            <p>To finalize your qualification, confirm your current work status.</p>
+            <div class="selection-list">
+                <div class="option-item" onclick="pickStatus('Permanently Employed', this)">Employed</div>
+                <div class="option-item" onclick="pickStatus('Self Employed', this)">Self Employed</div>
+                <div class="option-item" onclick="pickStatus('Employed', this)">Contract / Employed</div>
+                <div class="option-item" onclick="pickStatus('Not Employed', this)">Not Employed</div>
+            </div>
+            <button class="btn-next" onclick="processFinal()">Verify Now</button>
+        </div>
+
+        <!-- STEP 4: CONGRATULATIONS -->
+        <div class="card" id="step4">
+            <div class="ncr-badge">QUALIFICATION SECURED</div>
+            <h1 style="color: var(--primary);">Congratulations!</h1>
+            <p>The Oyster Personal Finance Team has confirmed that you Qualify to apply for:</p>
+            <div class="amount-hero" id="display-amount">R0.00</div>
+            <p>We are now preparing your application Form. Please do not close this window.</p>
+            <div class="loader"></div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--primary);">Secure Link Generating To apply Now</div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 3D SCENE (Web3 Styles) ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Geometry: A Digital Finance Grid
+        const gridGeo = new THREE.IcosahedronGeometry(15, 1);
+        const gridMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.1 });
+        const sphere = new THREE.Mesh(gridGeo, gridMat);
+        scene.add(sphere);
+
+        // Floating particles
+        const pCount = 800;
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = new Float32Array(pCount * 3);
+        for(let i=0; i<pCount*3; i++) { pPos[i] = (Math.random() - 0.5) * 40; }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+        const pMat = new THREE.PointsMaterial({ size: 0.05, color: 0x0066ff });
+        const points = new THREE.Points(pGeo, pMat);
+        scene.add(points);
+
+        camera.position.z = 20;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            sphere.rotation.y += 0.002;
+            sphere.rotation.x += 0.001;
+            points.rotation.y -= 0.001;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- APP LOGIC ---
+        gsap.to(".card.active", { opacity: 1, scale: 1, duration: 1, ease: "power4.out" });
+
+        function nextStep(step) {
+            const current = document.querySelector('.card.active');
+            const next = document.getElementById('step' + step);
+
+            gsap.to(current, { opacity: 0, scale: 0.9, y: -20, duration: 0.4, onComplete: () => {
+                current.classList.remove('active');
+                next.classList.add('active');
+                gsap.to(next, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.2)" });
+            }});
+        }
+
+        function pickAmount(val, el) {
+            localStorage.setItem('oyster_amt', val);
+            document.querySelectorAll('#step2 .option-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function pickStatus(val, el) {
+            localStorage.setItem('oyster_status', val);
+            document.querySelectorAll('#step3 .option-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function processFinal() {
+            const finalAmt = localStorage.getItem('oyster_amt') || "R10,000";
+            document.getElementById('display-amount').innerText = finalAmt;
+            
+            nextStep(4);
+
+            // Start Countdown
+            const timerEl = document.getElementById('redirect-timer');
+            timerEl.style.display = 'block';
+            gsap.from(timerEl, { y: 50, opacity: 0 });
+
+            let count = 6;
+            const interval = setInterval(() => {
+                count--;
+                document.getElementById('sec').innerText = count;
+                if(count <= 0) {
+                    clearInterval(interval);
+                    window.location.href = "https://oysterpersonalfinance.com/apply.html";
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
